@@ -1,7 +1,10 @@
 const http = require('http');
 const app = require('./app');
+const debug = require('debug')('e-template:server');
+const models = require('./models/index');
 
 const normalizePort = val => {
+    // Normalizeport function send a valid port, wether it's a number or a string
     const port = parseInt(val, 10);
 
     if (isNaN(port)) {
@@ -16,6 +19,7 @@ const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 const errorHandler = error => {
+    // the error handler function seek for different types of error and deals with them then it's saved in the server
     if (error.syscall !== 'listen') {
         throw error;
     }
@@ -37,11 +41,18 @@ const errorHandler = error => {
 
 const server = http.createServer(app);
 
-server.on('error', errorHandler);
-server.on('listening', () => {
-    const address = server.address();
-    const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
-    console.log('Listening on ' + bind);
+models.sequelize.sync().then(function() {
+    /**
+     * Listen on provided port, on all network interfaces.
+     */
+    server.listen(port, function() {
+        debug('Express server listening on port ' + server.address().port);
+    });
+    server.on('error', errorHandler);
+    server.on('listening', () => {
+        const address = server.address();
+        const bind =
+            typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
+        console.log('Listening on ' + bind);
+    });
 });
-
-server.listen(port);
