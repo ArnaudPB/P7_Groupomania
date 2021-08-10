@@ -8,9 +8,3 @@ export default {
         return axios.post('http://localhost:3000/api/login', credentials);
     },
 };
-
-/* Auth.register({
-    pseudo: 'Kiryu',
-    email: 'test@mail.com',
-    password: '123456'
-}) */

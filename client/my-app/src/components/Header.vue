@@ -2,7 +2,7 @@
   <nav>
     <!-- Start of app toolbar -->
     <v-app-bar app color="red lighten-4" dark>
-      <v-btn-toggle
+       <v-btn-toggle
         @click.stop="drawer = !drawer"
         class="hidden-md-and-up"
       ></v-btn-toggle>
@@ -21,10 +21,13 @@
       </v-toolbar-title>
       <v-btn v if="$store.state.isLoggedin" text to="/posts">Fil d'actu</v-btn>
       <v-spacer></v-spacer>
-      <v-btn v-if="!$store.state.isLoggedIn" text to="/" exact>Accueil</v-btn>
+
+
+     <!-- <v-btn v-if="!$store.state.isLoggedIn" text to="/" exact>Accueil</v-btn> -->
+      <account-preview v-if="$store.state.isLoggedIn"></account-preview>
 
       <v-btn v-if="!$store.state.isLoggedIn" text to="/login">Connexion</v-btn>
-      <v-btn v-if="!$store.state.isLoggedIn" text to="/signup"
+            <v-btn v-if="!$store.state.isLoggedIn" text to="/signup"
         >Inscription</v-btn
       >
       <v-btn v-if="$store.state.isLoggedIn" @click="logOut" text to="/"
@@ -84,27 +87,34 @@
   </nav>
 </template>
 <script>
-  export default {
-    name: 'PageHeader',
-    data() {
-      return {};
-    },
-    methods: {
-      logOut: function() {
-        this.$store.dispatch('setToken', null);
-        this.$store.dispatch('setUser', null);
-      },
-    },
-  };
+import AccountPreview from '../components/AccountPreview.vue';
+export default {
+  name: "PageHeader",
+  components: {
+    "account-preview": AccountPreview
+  },
+  data() {
+    return {};
+
+  },
+  computed: {},
+  methods: {
+    logOut: function() {
+      console.log(this.$store.state.user.photo);
+      this.$store.dispatch("setToken", null);
+      this.$store.dispatch("setUser", null);
+    }
+  }
+};
 </script>
 <style lang="scss" scoped>
   .v-btn {
-     margin-left: 20px;
-    &__content {
-      color: cornsilk !important;
-    }
+  margin-left: 20px;
+      &__content {
+    color: cornsilk !important;
   }
-  a {
-    background-color: transparent;
-  }
+}
+a {
+  background-color: transparent;
+}
 </style>

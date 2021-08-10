@@ -3,6 +3,7 @@
         "username": "root",
         "password": "LeonHeart,78",
         "database": "database_development",
+        "port": "3306",
         "host": "127.0.0.1",
         "dialect": "mysql",
         "define": {
@@ -14,6 +15,7 @@
         "username": "root",
         "password": "LeonHeart,78",
         "database": "database_test",
+        "port": "3306",
         "host": "127.0.0.1",
         "dialect": "mysql"
     },
@@ -21,6 +23,7 @@
         "username": "root",
         "password": "LeonHeart,78",
         "database": "database_production",
+        "port": "3306",
         "host": "127.0.0.1",
         "dialect": "mysql"
     }

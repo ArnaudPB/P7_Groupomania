@@ -9,49 +9,74 @@
           height="50"
         />
       </v-col>
-      <v-col cols="8">
+      <v-col cols="6">
         <v-card class="posts-card mx-auto" elevation="2">
-          <v-card-title flat dense dark class="red lighten-4">
-            <v-icon>mdi-share-variant</v-icon>
-            <v-btn text to="/signup">Les + récents</v-btn>
-            <v-btn text to="/about">Les + likés</v-btn>
+          <v-card-title 
+            class="d-flex justify-space-between red lighten-4"
+            flat
+            dense
+            dark
+          >
+            <div>
+              <v-btn to="/signup">Les + récents</v-btn>
+              <v-btn class="ml-4" to="/about">Les + likés</v-btn>
+            </div>
+            <v-btn to="/posts/add"
+              ><v-icon>{{ mdiPencilOutline }}</v-icon></v-btn
+            >
           </v-card-title>
+        <v-card-text>
+            <posts
+              v-for="(item, i) in posts"
+              :key="i"
+              :title="item.title"
+              :message="item.message"
+              :pseudo="item.User.pseudo"
+              :link="item.link"
+            ></posts>
+          </v-card-text>
         </v-card>
       </v-col>
-      <posts
-        v-for="(item, i) in postsContent"
-        :key="i"
-        :title="item.title"
-        :message="item.message"
-        :author="item.author"
-        :image="item.image"
-      ></posts>
+      <div class="danger-alert" v-html="errorMessage" />
     </v-row>
   </v-container>
 </template>
 
 <script>
   // @ is an alias to /src
-  import Posts from '../components/Posts.vue';
-  export default {
-    name: 'Feed',
-    components: {
-      Posts,
-    },
-    data() {
-      return {
-        postsContent: [
-          {
-            title: 'A quote for your minds',
-            message: 'Man is least himself when he talks in his own person, give him a mask and he will tell the truth',
-            image: {
-              source: "../assets/download.jpg",
-            },
-            author: 'Oscar Wilde',
-          },
-        ],
-      };
-    },
-  };
+import PostService from "../services/PostService";
+import Posts from "../components/Posts.vue";
+import { mdiPencilOutline } from "@mdi/js";
+export default {
+  name: "Feed",
+  components: {
+    Posts
+  },
+  data() {
+    return {
+      posts: [],
+      errorMessage: null,
+      mdiPencilOutline
+    };
+  },
+  async mounted() {
+    try {
+      const response = await PostService.getPosts();
+      console.log(response);
+      for (const post of response.data) {
+        console.log(post);
+        this.posts.push(post);
+      }
+         /* this.$store.dispatch('setToken', response.data.token);
+          this.$store.dispatch('setUser', response.data.user);
+          let router = this.$router;
+          setTimeout(function() {
+            router.push('/posts');
+          }, 1500); */
+      } catch (error) {
+      this.errorMessage = error.response.data.error;
+    }
+  }
+};
 </script>
 <style></style>

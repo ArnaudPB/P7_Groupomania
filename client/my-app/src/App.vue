@@ -7,15 +7,18 @@
         <!-- Display view pages here based on route -->
       </v-container>
     </v-main>
+    <page-footer></page-footer>
   </v-app>
 </template>
 
 <script>
   import PageHeader from './components/Header.vue';
+  import PageFooter from './components/Footer.vue';
   export default {
     name: 'app',
     components: {
       PageHeader,
+      PageFooter,
     },
      data: () => {
       return {

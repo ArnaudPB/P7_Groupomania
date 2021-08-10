@@ -1,13 +1,13 @@
 const bcrypt = require('bcrypt'); // encryption
-const models = require('../models'); // model user
+const db = require('../models'); // model user
 const jwt = require('jsonwebtoken'); // token generator package
 const emailValidator = require('email-validator'); // email validator package
 const passwordValidator = require('password-validator'); // password validator package
-const config = require('../config/config.json');
+const config = require('../config');
 
 exports.signup = async(req, res) => {
     try {
-        const user = await models.Users.findOne({
+        const user = await db.User.findOne({
             where: { email: req.body.email } && { pseudo: req.body.pseudo },
         });
         if (user) {
@@ -16,7 +16,7 @@ exports.signup = async(req, res) => {
             });
         } else {
             const hash = await bcrypt.hash(req.body.password, 10);
-            const newUser = await models.Users.create({
+            const newUser = await db.User.create({
                 pseudo: req.body.pseudo,
                 email: req.body.email,
                 password: hash,
@@ -41,7 +41,7 @@ exports.signup = async(req, res) => {
 exports.login = async(req, res, next) => {
     // connexion du user
     try {
-        const user = await models.Users.findOne({
+        const user = await db.User.findOne({
                 where: { email: req.body.email },
             }) // checking if mail address is in DB
             .then((user) => {
@@ -75,3 +75,45 @@ exports.login = async(req, res, next) => {
         return res.status(500).send({ error: 'Erreur serveur' });
     }
 };
+exports.getAccount = async(req, res) => {
+    try {
+        const user = await db.User.findOne({
+            attributes: ['pseudo', 'email', 'photo'],
+            where: { id: req.params.id }
+        })
+        res.status(200).json(user);
+    } catch (error) {
+        return res.status(500).send({ error: 'Erreur serveur' });
+
+    }
+}
+exports.getAllUsers = async(req, res) => {
+    try {
+        const user = await db.User.findAll();
+        console.log(user)
+        res.status(200).json(user);
+    } catch (error) {
+        return res.status(500).send({ error: 'Erreur serveur' });
+    }
+}
+
+
+
+exports.updateAccount = async(req, res) => {
+    try {
+        const id = req.params.id;
+        /* const user = await models.Users.findOne({ where: { id: id } });
+        console.log(user) */
+        const userObject = req.file ? // on vérifie si la modification concerne le body ou un nouveau fichier image
+            {
+                ...JSON.parse(req.body),
+                photo: `${req.protocol}://${req.get('host')}/upload/${req.file.filename}`
+            } : {...req.body };
+        console.log(userObject);
+        const response = await db.User.update(userObject, { where: { id: id } });
+        res.status(200).json({ message: "profil modifié" });
+
+    } catch (error) {
+        return res.status(500).send({ error: 'Erreur serveur' });
+    }
+}
