@@ -7,18 +7,9 @@
     <v-layout row class="signup-box">
       <v-col lg="5" md="6" sm="6" ml-5>
         <v-card class="signup-card" elevation="4" xs6>
-          <v-card-title flat dense dark>Inscription</v-card-title>
+          <v-card-title flat dense dark>Connexion</v-card-title>
           <v-card-text class="font-weight-light">
-            <v-form v-model="isValid" autocomplete="off">
-              <v-text-field
-                label="pseudo"
-                v-model="pseudo"
-                type="text"
-                :rules="[(v) => !!v || 'Pseudo is required']"
-                required
-                class="input-group--focused"
-              >
-              </v-text-field>
+            <v-form v-model="isValid">
               <v-text-field
                 label="email"
                 v-model="email"
@@ -26,7 +17,6 @@
                 :rules="[(v) => !!v || 'Email is required']"
                 required
                 class="input-group--focused"
-                autocomplete="off"
               >
               </v-text-field>
               <v-text-field
@@ -36,7 +26,6 @@
                 :rules="[(v) => !!v || 'Password is required']"
                 required
                 class="input-group--focused"
-                autocomplete="off"
               >
               </v-text-field>
 
@@ -46,7 +35,7 @@
               <input />
               <br />
               <div class="danger-alert" v-html="errorMessage" />
-              <div class="danger-alert" v-html="message"/>
+              <div class="danger-alert" v-html="message" />
               <br />
             </v-form>
           </v-card-text>
@@ -55,7 +44,7 @@
               class="dark"
               elevation="2"
               :disabled="!isValid"
-              v-on:click.prevent="signup"
+              v-on:click.prevent="login"
               >Envoyer
             </v-btn>
           </v-card-actions>
@@ -66,41 +55,40 @@
 </template>
 
 <script>
-import Auth from "../services/Auth.js"; // Importing Axios
-export default {
-  name: "Signup",
-  data() {
-    return {
-      pseudo: "",
-      email: "",
-      password: "",
-      errorMessage: null,
-      message: null,
-      isValid: true,
-    };
-  },
-  methods: {
-    async signup() {
-      try {
-        const response = await Auth.signup({
-          pseudo: this.pseudo,
-          email: this.email,
-          password: this.password,
-        });
-        this.message = response.data.message;
-        console.log(response.data);
-        this.$store.dispatch('setToken', response.data.token);
+  // import axios from 'axios';
+  import Auth from '../services/Auth.js';
+  export default {
+    name: 'Login',
+    data() {
+      return {
+        email: '',
+        password: '',
+        errorMessage: null,
+        isValid: true,
+        message: null,
+      };
+    },
+    methods: {
+      async login() {
+        try {
+          const response = await Auth.login({
+            email: this.email,
+            password: this.password,
+          });
+          console.log(response.data);
+          this.message = response.data.message;
+          this.$store.dispatch('setToken', response.data.token);
           this.$store.dispatch('setUser', response.data.user);
           let router = this.$router;
           setTimeout(function() {
             router.push('/');
           }, 1500);
-      } catch (error) {
-        this.errorMessage = error.response.data.error;
-      }
+        } catch (error) {
+          this.errorMessage = error.response.data.error;
+        }
+      },
     },
-  },
-};
+  };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
