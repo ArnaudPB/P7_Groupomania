@@ -1,38 +1,38 @@
-import axios from 'axios';
+import Api from '../services/Api';
 
 export default {
     getPosts() {
-        return axios.get('http://localhost:3000/api/posts');
+        return Api().get('posts');
     },
     getPostbyId(id) {
-        return axios.get('http://localhost:3000/api/posts/' + id);
+        return Api().get('posts/' + id);
     },
     createPost() {
-        return axios.post('http://localhost:3000/api/posts');
+        return Api().post('posts');
     },
     updatePost(id) {
-        return axios.put('http://localhost:3000/api/posts/' + id);
+        return Api().put('posts/' + id);
     },
     deletePost(id) {
-        return axios.delete('http://localhost:3000/api/posts/' + id);
+        return Api().delete('posts/' + id);
     },
     likePost(id) {
-        return axios.post('http://localhost:3000/api/posts/' + id) + '/like';
+        return Api().post('posts/' + id) + '/like';
     },
     dislikePost(id) {
-        return axios.post('http://localhost:3000/api/posts/' + id + '/like');
+        return Api().post('posts/' + id + '/like');
     },
     commentPost(id) {
-        return axios.post('http://localhost:3000/api/posts/' + id + '/comment');
+        return Api().post('posts/' + id + '/comment');
     },
     updateComment(id, comId) {
-        return axios.put(
-            'http://localhost:3000/api/posts/' + id + '/comment/' + comId
+        return Api().put(
+            'posts/' + id + '/comment/' + comId
         );
     },
     deleteComment(id, comId) {
-        return axios.delete(
-            'http://localhost:3000/api/posts/' + id + '/comment' + comId
+        return Api().delete(
+            'posts/' + id + '/comment' + comId
         );
     },
 };

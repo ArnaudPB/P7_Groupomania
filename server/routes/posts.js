@@ -1,12 +1,18 @@
-const express = require('express');
-const router = express.Router();
+const router = require('express').Router();
 const postsCtrl = require('../controllers/posts');
+const auth = require('../middleware/auth');
+const multer = require('../middleware/multer-config');
 
-router.get('/posts', postsCtrl.getAllPosts);
-router.post('/posts', postsCtrl.createPost);
-router.get('/posts/:id', postsCtrl.getOnePost);
+router.get('/protected', auth, (req, res, next) => {
+    res.status(200).json({ success: true, msg: "You are successfully authenticated to this route!" });
+});
+
+router.get('/posts', auth, postsCtrl.getAllPosts);
+router.post('/posts/add', multer, postsCtrl.createPost);
+
+router.get('/posts/:id', auth, postsCtrl.getOnePost);
 // router.put('/posts/:id', postsCtrl.updatePost);
-// router.delete('/posts/:id', postsCtrl.deletePost);
+router.delete('/posts/:id', auth, postsCtrl.deletePost);
 //router.get('/posts/category/:id', postsCtrl.getPostsByCategory);
 // router.post('/posts/:id', postsCtrl.commentPost);
 //router.post('/posts/:id/like', postsCtrl.likePost);

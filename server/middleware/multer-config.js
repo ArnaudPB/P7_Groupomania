@@ -6,17 +6,6 @@ const MIME_TYPES = { // notre dictionnaire d'extensions
     'image/png': 'png',
     'image.gif': 'gif'
 };
-/* const upload = multer({
-    storage: storage,
-    fileFilter: (req, file, callback) => {
-        if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg" || file.mimetype == "image/gif") {
-            callback(null, true);
-        } else {
-            callback(null, false);
-            return callback(new Error('Allowed only .png, .jpg, .jpeg and .gif'));
-        }
-    }
-}); */
 const storage = multer.diskStorage({
     destination: (req, file, callback) => { // destination des images
         callback(null, 'upload');
@@ -27,4 +16,4 @@ const storage = multer.diskStorage({
         callback(null, name + Date.now() + '.' + extension);
     }
 });
-module.exports = multer({ storage }).single('image');
+module.exports = multer({ storage: storage }).single('imageUrl');

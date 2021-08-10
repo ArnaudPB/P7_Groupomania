@@ -33,6 +33,7 @@
               :message="item.message"
               :pseudo="item.User.pseudo"
               :link="item.link"
+              :imageUrl="item.imageUrl"
             ></posts>
           </v-card-text>
         </v-card>
@@ -67,12 +68,6 @@ export default {
         console.log(post);
         this.posts.push(post);
       }
-         /* this.$store.dispatch('setToken', response.data.token);
-          this.$store.dispatch('setUser', response.data.user);
-          let router = this.$router;
-          setTimeout(function() {
-            router.push('/posts');
-          }, 1500); */
       } catch (error) {
       this.errorMessage = error.response.data.error;
     }

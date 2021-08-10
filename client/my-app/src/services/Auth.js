@@ -1,10 +1,10 @@
-import axios from "axios";
+import Api from '../services/Api';
 
 export default {
-    signup(info) {
-        return axios.post("http://localhost3000/api/signup", info);
+    signup(credentials) {
+        return Api().post('signup', credentials);
     },
     login(credentials) {
-        return axios.post('http://localhost:3000/api/login', credentials);
-    },
+        return Api().post('login', credentials);
+    }
 };
