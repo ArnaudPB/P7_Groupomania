@@ -93,7 +93,7 @@ export default {
           this.$store.dispatch('setUser', response.data.user);
           let router = this.$router;
           setTimeout(function() {
-            router.push('/');
+            router.push('/posts');
           }, 1500);
       } catch (error) {
         this.errorMessage = error.response.data.error;

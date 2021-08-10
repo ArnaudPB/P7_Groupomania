@@ -2,10 +2,10 @@
   <nav>
     <!-- Start of app toolbar -->
     <v-app-bar app color="red lighten-4" dark>
-      <v-toolbar-side-icon
+      <v-btn-toggle
         @click.stop="drawer = !drawer"
         class="hidden-md-and-up"
-      ></v-toolbar-side-icon>
+      ></v-btn-toggle>
       <v-toolbar-title class="headline text-uppercase">
         <router-link to="/">
           <v-img
@@ -19,24 +19,20 @@
           />
         </router-link>
       </v-toolbar-title>
+      <v-btn v if="$store.state.isLoggedin" text to="/posts">Fil d'actu</v-btn>
       <v-spacer></v-spacer>
-      <v-toolbar-items class="hidden-sm-and-down">
-        <v-btn color="red lighten-4" to="/" exact>Home</v-btn>
-        <v-btn color="red lighten-4" to="/signup">Inscription</v-btn>
+      <v-btn v-if="!$store.state.isLoggedIn" text to="/" exact>Accueil</v-btn>
 
-        <v-btn v-if="!$store.state.isLoggedIn" color="red lighten-4" to="/login"
-          >Connexion</v-btn
-        >
-        <v-btn
-          v-if="$store.state.isLoggedIn"
-          v-on:click="logOut"
-          color="red lighten-4"
-          to="/login"
-          >Déconnexion</v-btn
-        >
-        <v-btn color="red lighten-4" to="/signup">Profil</v-btn>
-        <v-btn color="red lighten-4" to="/about">About</v-btn>
-      </v-toolbar-items>
+      <v-btn v-if="!$store.state.isLoggedIn" text to="/login">Connexion</v-btn>
+      <v-btn v-if="!$store.state.isLoggedIn" text to="/signup"
+        >Inscription</v-btn
+      >
+      <v-btn v-if="$store.state.isLoggedIn" @click="logOut" text to="/"
+        >Déconnexion</v-btn
+      >
+
+      <v-btn text to="/signup">Profil</v-btn>
+      <v-btn text to="/about">About</v-btn>
     </v-app-bar>
     <!-- End of app toolbar -->
     <!-- Start of mobile side menu -->
@@ -95,15 +91,20 @@
     },
     methods: {
       logOut: function() {
-        this.$store.state.token === null,
-          this.$store.state.user === null,
-          this.$store.state.isLoggedIn === false;
+        this.$store.dispatch('setToken', null);
+        this.$store.dispatch('setUser', null);
       },
     },
   };
 </script>
 <style lang="scss" scoped>
   .v-btn {
-    color: red !important;
+     margin-left: 20px;
+    &__content {
+      color: cornsilk !important;
+    }
+  }
+  a {
+    background-color: transparent;
   }
 </style>
