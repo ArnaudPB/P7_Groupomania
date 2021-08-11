@@ -2,8 +2,8 @@
   <v-footer fixed v-bind="localAttrs" :padless="padless">
     <v-card flat tile width="100%" class="red lighten-4 text-center">
       <v-card-text class="white--text">
-        <v-btn icon class="mx-4">
-          <v-icon size="24px">
+        <v-btn  to="/" icon class="mx-4">
+          <v-icon  size="24px">
             {{ mdiHome }}
           </v-icon>
         </v-btn>

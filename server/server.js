@@ -55,4 +55,6 @@ models.sequelize.sync().then(function() {
             typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
         console.log('Listening on ' + bind);
     });
+
+    require('./config/admin');
 });

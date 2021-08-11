@@ -4,7 +4,8 @@ const MIME_TYPES = { // notre dictionnaire d'extensions
     'image/jpg': 'jpg',
     'image/jpeg': 'jpg',
     'image/png': 'png',
-    'image.gif': 'gif'
+    'image.gif': 'gif',
+    'image.webp': 'webp'
 };
 const storage = multer.diskStorage({
     destination: (req, file, callback) => { // destination des images

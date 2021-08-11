@@ -31,3 +31,14 @@ exports.signup = (req, res, next) => {
         next();
     }
 };
+exports.checkPseudo = (req, res, next) => {
+    const regex = /^[a-zA-Z0-9_]{4,30}$/; // Lettres, espaces et doit être entre 4 et 30 caractères
+    const pseudo = req.body.pseudo;
+    if (regex.test(pseudo) === true) {
+        next();
+    } else {
+        return res.status(400).send({
+            error: 'Votre pseudo doit être de 4 caractères minimum et 30 maximum, sont acceptées les lettres, chiffres et underscore (_)  ',
+        })
+    }
+}

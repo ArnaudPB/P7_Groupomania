@@ -1,135 +1,158 @@
-const bcrypt = require('bcrypt'); // encryption
-const db = require('../models'); // model user
-const emailValidator = require('email-validator'); // email validator package
-const passwordValidator = require('password-validator'); // password validator package
-const token = require('../middleware/token');
+const bcrypt = require("bcrypt"); // chiffrement du password
+const db = require("../models"); // mdèles de la bdd
+const token = require("../middleware/token"); // module qui génère le token
+const fs = require("fs");
+const { Op } = require("sequelize");
 
 exports.signup = async(req, res) => {
     try {
         const user = await db.User.findOne({
-                where: { email: req.body.email } && { pseudo: req.body.pseudo },
-            })
-            .then((user) => {
-                if (user) {
-                    res.status(400).json({ message: 'Cette adresse mail ou ce pseudo sont déjà utilisés !' });
-                } else {
-                    bcrypt.hash(req.body.password, 10)
-                        .then(hash => {
-                            const newUser = db.User.create({
-                                pseudo: req.body.pseudo,
-                                email: req.body.email,
-                                password: hash,
-                            })
+            where: { email: req.body.email },
+        });
+        if (user !== null) {
+            if (user.pseudo === req.body.pseudo) {
+                return res.status(400).json({ error: "ce pseudo est déjà utilisé" });
+            }
+        } else {
+            const hash = await bcrypt.hash(req.body.password, 10);
+            const newUser = await db.User.create({
+                pseudo: req.body.pseudo,
+                email: req.body.email,
+                password: hash,
+                admin: false,
+            });
 
-                            then((newUser) => {
-
-                                    newUser = newUser.toJSON();
-                                    const tokenObject = token.issueJWT(newUser)
-                                    res.status(200).send({
-                                        user: newUser,
-                                        token: tokenObject.token,
-                                        expires: tokenObject.expiresIn,
-                                        message: `Votre compte est bien créé ${newUser.pseudo} !`,
-                                    });
-                                })
-                                .catch((error) => {
-                                    res.status(500).send({ error: 'Erreur serveur' });
-                                })
-                        })
-                        .catch((error) => {
-                            res.status(500).send({ error: 'Erreur serveur' });
-                        })
-                }
-            })
-            .catch((error) => {
-                return res.status(500).send({ error: 'Erreur serveur' });
-            })
+            const tokenObject = await token.issueJWT(newUser);
+            res.status(201).send({
+                user: newUser,
+                token: tokenObject.token,
+                expires: tokenObject.expiresIn,
+                message: `Votre compte est bien créé ${newUser.pseudo} !`,
+            });
+        }
     } catch (error) {
-        return res.status(500).send({ error: 'Erreur serveur' });
+        return res.status(400).send({ error: "email déjà utilisé" });
     }
 };
 
-exports.login = async(req, res, next) => {
-    // connexion du user
+exports.login = async(req, res) => {
     try {
         const user = await db.User.findOne({
-                where: { email: req.body.email },
-            }) // checking if mail address is in DB
-            .then((user) => {
-                if (user === null) {
-                    return res.status(403).send({ error: 'Connexion échouée' });
-                } else {
-                    bcrypt
-                        .compare(req.body.password, user.password) // on compare les mots de passes
-                        .then((valid) => {
-                            if (!valid) {
-                                return res
-                                    .status(401)
-                                    .send({ error: 'Mot de passe incorrect !' });
-                            }
-                            user = user.toJSON();
-                            const tokenObject = token.issueJWT(user)
-                            res.status(200).json({
-                                user: user,
-                                token: tokenObject.token,
-                                sub: tokenObject.sub,
-                                expires: tokenObject.expiresIn,
-                                message: 'Bonjour ' + user.pseudo + '!',
-                            });
-                        })
-                        .catch((error) => res.status(500).json({ error }));
-                }
-            })
-            .catch((error) => res.status(500).json({ error }));
+            where: { email: req.body.email },
+        }); // on vérifie que l'adresse mail figure bien dan la bdd
+        if (user === null) {
+            return res.status(403).send({ error: "Connexion échouée" });
+        } else {
+            const hash = await bcrypt.compare(req.body.password, user.password); // on compare les mots de passes
+            if (!hash) {
+                return res.status(401).send({ error: "Mot de passe incorrect !" });
+            } else {
+                const tokenObject = await token.issueJWT(user);
+                res.status(200).send({
+                    // on renvoie le user et le token
+                    user: user,
+                    token: tokenObject.token,
+                    sub: tokenObject.sub,
+                    expires: tokenObject.expiresIn,
+                    message: "Bonjour " + user.pseudo + " !",
+                });
+            }
+        }
     } catch (error) {
-        return res.status(500).send({ error: 'Erreur serveur' });
+        return res.status(500).send({ error: "Erreur serveur" });
     }
 };
 exports.getAccount = async(req, res) => {
+    // on trouve l'utilisateur et on renvoie l'objet user
     try {
         const user = await db.User.findOne({
-            attributes: ['pseudo', 'email', 'photo'],
-            where: { id: req.params.id }
-        })
-        res.status(200).json(user);
+            where: { id: req.params.id },
+        });
+        res.status(200).send(user);
     } catch (error) {
-        return res.status(500).send({ error: 'Erreur serveur' });
-
+        return res.status(500).send({ error: "Erreur serveur" });
     }
-}
+};
 exports.getAllUsers = async(req, res) => {
+    // on envoie tous les users sauf admin
     try {
-        const user = await db.User.findAll();
-        console.log(user)
-        res.status(200).json(user);
+        const users = await db.User.findAll({
+            attributes: ["pseudo", "id", "photo", "bio", "email"],
+            where: {
+                id: {
+                    [Op.ne]: 1,
+                },
+            },
+        });
+        res.status(200).send(users);
     } catch (error) {
-        return res.status(500).send({ error: 'Erreur serveur' });
+        return res.status(500).send({ error: "Erreur serveur" });
     }
-}
-
-
-
+};
 exports.updateAccount = async(req, res) => {
-        try {
-            const id = req.params.id;
-            /* const user = await models.Users.findOne({ where: { id: id } });
-            console.log(user) */
-            const userObject = req.file ? // on vérifie si la modification concerne le body ou un nouveau fichier image
-                {
-                    ...JSON.parse(req.body),
-                    photo: `${req.protocol}://${req.get('host')}/upload/${req.file.filename}`
-                } : {...req.body };
-            console.log(userObject);
-            const response = await db.User.update(userObject, { where: { id: id } });
-            res.status(200).json({ message: "profil modifié" });
-
-        } catch (error) {
-            return res.status(500).send({ error: 'Erreur serveur' });
+    // modifier le profil
+    const id = req.params.id;
+    try {
+        const userId = token.getUserId(req);
+        let newPhoto;
+        let user = await db.User.findOne({ where: { id: id } }); // on trouve le user
+        if (userId === user.id) {
+            if (req.file && user.photo) {
+                newPhoto = `${req.protocol}://${req.get("host")}/upload/${
+          req.file.filename
+        }`;
+                const filename = user.photo.split("/upload")[1];
+                fs.unlink(`upload/${filename}`, (err) => {
+                    // s'il y avait déjà une photo on la supprime
+                    if (err) console.log(err);
+                    else {
+                        console.log(`Deleted file: upload/${filename}`);
+                    }
+                });
+            } else if (req.file) {
+                newPhoto = `${req.protocol}://${req.get("host")}/upload/${
+          req.file.filename
+        }`;
+            }
+            if (newPhoto) {
+                user.photo = newPhoto;
+            }
+            if (req.body.bio) {
+                user.bio = req.body.bio;
+            }
+            if (req.body.pseudo) {
+                user.pseudo = req.body.pseudo;
+            }
+            const newUser = await user.save({ fields: ["pseudo", "bio", "photo"] }); // on sauvegarde les changements dans la bdd
+            res.status(200).json({
+                user: newUser,
+                messageRetour: "Votre profil a bien été modifié",
+            });
+        } else {
+            res
+                .status(400)
+                .json({ messageRetour: "Vous n'avez pas les droits requis" });
         }
+    } catch (error) {
+        return res.status(500).send({ error: "Erreur serveur" });
     }
-    /* jwt.sign(
-    // on génère un token de session pour le user maintenant connecté
-    { userId: user.id },
-    'JWT_SECRET',
-    { expiresIn: Math.floor(Date.now() / 1000) + 60 * 60 }
-    ), */
+};
+exports.deleteAccount = async(req, res) => {
+    try {
+        const id = req.params.id;
+        const user = await db.User.findOne({ where: { id: id } });
+        if (user.photo !== null) {
+            const filename = user.photo.split("/upload")[1];
+            fs.unlink(`upload/${filename}`, () => {
+                // sil' y a une photo on la supprime et on supprime le compte
+                db.User.destroy({ where: { id: id } });
+                res.status(200).json({ messageRetour: "utilisateur supprimé" });
+            });
+        } else {
+            db.User.destroy({ where: { id: id } }); // on supprime le compte
+            res.status(200).json({ messageRetour: "utilisateur supprimé" });
+        }
+    } catch (error) {
+        return res.status(500).send({ error: "Erreur serveur" });
+    }
+};
