@@ -1,38 +1,34 @@
-import Api from '../services/Api';
+import Api from "../services/Api";
 
 export default {
     getPosts() {
-        return Api().get('posts');
+        return Api().get("posts");
+    },
+    getHotPosts() {
+        return Api().get("posts/hot");
     },
     getPostById(id) {
-        return Api().get('posts/' + id);
+        return Api().get("posts/" + id);
     },
+    createPost(data) {
+        return Api().post("posts/add", data);
+    },
+    updatePost(id, data) {
+        return Api.put("posts/" + id, data);
+    },
+
     deletePost(id) {
-        return Api().delete('posts/' + id);
+        return Api().delete("posts/" + id);
     },
     likePost(id) {
-        return Api().post('posts/' + id) + '/like';
+        return Api().post("posts/" + id) + "/like";
     },
-    dislikePost(id) {
-        return Api().post('posts/' + id + '/like');
+
+    commentPost(id, data) {
+        return Api().post("posts/" + id + "/comments", data);
     },
-    commentPost(id) {
-        return Api().post('posts/' + id + '/comment');
-    },
-    updateComment(id, comId) {
-        return Api().put(
-            'posts/' + id + '/comment/' + comId
-        );
-    },
-    deleteComment(id, comId) {
-        return Api().delete(
-            'posts/' + id + '/comment' + comId
-        );
+
+    deleteComment(id) {
+        return Api().delete("posts/comments/" + id);
     },
 };
-
-/* Auth.register({
-    pseudo: 'john'
-    email: 'test@mail.com',
-    password: '123456'
-}) */

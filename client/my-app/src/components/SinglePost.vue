@@ -1,268 +1,216 @@
-<template >
-  <v-container fluid class="bloc-modal">
-    <div class="overlay "></div>
-    <div v-if="post.data.imageUrl" class="modal-card ">
-      <v-card class="mx-auto post-card" color="red lighten-4" max-width="600">
-        <v-card-title class="post-title-box">
-          <v-icon medium color="white" left>
-            {{ mdiMessageSettingsOutline }}
-          </v-icon>
-
-          <div class="update-title pl-3 pb-5">
-            <span class="title font-weight-light post-title "
-              >Modifiez votre post</span
+<template>
+  <v-container fluid class="post-box">
+    <v-card class="mx-auto post-card" max-width="600">
+      <v-card-title class="post-title-box">
+        <div class="update-title mx-auto">
+          <h1 class="font-weight-regular titre titre_new">
+            Modifier
+          </h1>
+          <v-btn @click="getBackToFeed" class="mx-2 return-btn" small>
+            Retour
+          </v-btn>
+        </div>
+      </v-card-title>
+      <v-divider></v-divider>
+      <v-card-text>
+        <div v-if="showMessage" class="d-flex justify-space-between">
+          <div class="d-flex flex-column mx-auto">
+            <span>Ton message: </span>
+            <div
+              class="message ml-n4
+                "
             >
-            <v-icon
-              @click="getBackToFeed"
-              class=" rounded-circle cancel-update"
-              >{{ mdiCloseThick }}</v-icon
+              <span>{{ post.message }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="withMessage" class="text-box">
+          <v-textarea
+            label="Message"
+            v-model="message"
+            text="text"
+            solo
+            type="text"
+            required
+            name="input-7-4"
+            class="mr-5 ml-3 text-area"
+          ></v-textarea>
+        </div>
+        <div class="d-flex justify-center pt-3">
+          <v-btn @click="toggleMessage" x-small>
+            modifier
+          </v-btn>
+        </div>
+      </v-card-text>
+      <v-form v-model="isValid" enctype="multipart/form-data" class="validate ">
+        <div v-if="withLink" class="link-box pb-5 pt-5">
+          <v-text-field
+            name="input-1-3"
+            filled
+            label="lien du gif"
+            v-model="link"
+            type="text"
+            auto-grow
+            class="mr-5 ml-3"
+          ></v-text-field>
+        </div>
+        <div v-if="showImage">
+          <v-img
+            v-if="post.imageUrl"
+            :src="post.imageUrl"
+            :max-height="250"
+            :max-width="150"
+            class="mx-auto mb-5"
+          ></v-img>
+        </div>
+        <div v-if="showLink">
+          <v-img
+            v-if="post.link"
+            :src="post.link"
+            :max-height="250"
+            :max-width="150"
+            class="mx-auto mb-5"
+          ></v-img>
+        </div>
+        <div v-if="withImage" class="pb-5 pt-5 d-flex justify-center">
+          <label for="image" class="pr-3">Image</label>
+          <input
+            @change="uploadImage"
+            type="file"
+            aria-label="image input"
+            accept="image/png, image/jpeg,image/bmp, image/gif"
+            ref="file"
+            name="image"
+          />
+        </div>
+        <v-divider></v-divider>
+        <v-card-text v-if="options" class="d-flex justify-center my-3">
+          <div class="bloc-option">
+            <v-btn
+              v-if="post.link"
+              @click="toggleLink"
+              class="mx-2 mt-2 "
+              x-small
+              :elevation="2"
             >
+              Changer le Gif
+            </v-btn>
+            <v-btn
+              v-if="post.imageUrl"
+              @click="toggleImage"
+              class="mx-2 mt-2 "
+              x-small
+              :elevation="2"
+            >
+              Changer l'image
+            </v-btn>
           </div>
-        </v-card-title>
-        <v-form
-          v-model="isValid"
-          @submit.prevent="onSubmit"
-          enctype="multipart/form-data"
-          class="validate "
-        >
-          <div class="text-box">
-            <v-textarea
-              v-if="textInput"
-              name="input-1-2"
-              filled
-              label="Message"
-              v-model="message"
-              :rules="[rules.required]"
-              auto-grow
-              clearable: true
-              class="mr-5 ml-3"
-            ></v-textarea>
-            <span v-else class="pl-5">{{ post.data.message }} </span>
-            <v-icon @click="newText" class=" rounded-circle cancel-update">{{
-              mdiCloseThick
-            }}</v-icon>
-          </div>
-
-          <div class="link-box pb-5 pt-5">
-            <v-text-field
-              v-if="linkInput"
-              name="input-1-3"
-              filled
-              label="link"
-              v-model="link"
-              auto-grow
-              class="mr-5 ml-3"
-            ></v-text-field>           
-
-          </div>
-          <v-img           
-            :src="post.data.imageUrl"
-            :max-height="300"
-            :max-width="200"
-            class="mx-auto pb-5"
-          ></v-img>
-          <div class="pb-5 pt-5">
-            <label for="image" class="pl-5">Image</label>
-            <input
-              @change="uploadImage"
-              type="file"
-              accept="image/png, image/jpeg,
-        image/bmp, image/gif"
-              ref="file"
-              name="image"
-            />
-          </div>
-          <div class="pl-5 pt-5">
-            <v-btn @click="onSubmit" :disabled="!isValid">Poster</v-btn>
-          </div>
-
-          <br />
-          <div class="danger-alert" v-html="errorMessage" />
-          <div class="danger-alert" v-html="messageRetour" />
-        </v-form>
-      </v-card>
-    </div>
-    <div v-if="post.data.link" class="modal-card ">
-      <v-card class="mx-auto post-card" color="red lighten-4" max-width="600">
-        <v-card-title class="post-title-box">
-          <v-icon medium color="white" left>
-            {{ mdiMessageSettingsOutline }}
-          </v-icon>
-          <div class="update-title pl-3 pb-5 ">
-            <span class="title font-weight-light post-title ">Votre post</span>            
-            <v-btn  @click="getBackToFeed" class="mx-2 return-btn" dark small  color="grey" > Retour  </v-btn>
-          </div>
-        </v-card-title>
-        <v-card-text>
-           <span class="pl-5">{{ post.data.message }} </span>
-            <v-img        
-            :src="post.data.link"
-            :max-height="300"
-            :max-width="200"
-            class="mx-auto pb-5"
-          ></v-img>
         </v-card-text>
-        <v-form
-          v-model="isValid"
-          @submit.prevent="onSubmit"
-          enctype="multipart/form-data"
-          class="validate "
-        >
-          <div class="text-box">
-            <v-textarea
-              v-if="textInput"
-              name="input-1-2"
-              filled
-              label="Message"
-              v-model="message"
-              :rules="[rules.required]"
-              auto-grow
-              class="mr-5 ml-3"
-            ></v-textarea>
+        <div class=" d-flex justify-center  ">
+          <v-btn @click="onSubmit" :disabled="!isValid" class="mb-3"
+            >Poster</v-btn
+          >
+        </div>
 
-            <v-icon @click="newText" class=" rounded-circle cancel-update">{{
-              mdiCloseThick
-            }}</v-icon>
-          </div>
-
-          <div class="link-box pb-5 pt-5">
-            <v-text-field
-              v-if="linkInput"
-              name="input-1-3"
-              filled
-              label="link"
-              v-model="link"
-              auto-grow
-              class="mr-5 ml-3"
-            ></v-text-field>
-
-            <v-icon @click="newLink" class=" rounded-circle cancel-update">{{
-              mdiCloseThick
-            }}</v-icon>
-          </div>
-         <div class="pb-5 pt-5">
-            <label for="image" class="pl-5">Image</label>
-            <input
-              @change="uploadImage"
-              type="file"
-              accept="image/png, image/jpeg,
-        image/bmp, image/gif"
-              ref="file"
-              name="image"
-            />
-          </div>
-          <div class="pl-5 pt-5">
-          <v-btn @click="onSubmit" :disabled="!isValid">Poster</v-btn>
-          </div>
-
-          
-          <br />
-          <div class="danger-alert" v-html="errorMessage" />
-          <div class="danger-alert" v-html="messageRetour" />
-        </v-form>
-      </v-card>
-    </div>
+      </v-form>
+      
+    </v-card>
   </v-container>
 </template>
 <script>
-//import PostService from "../services/PostService";
-import axios from "axios";
-import { mdiCloseThick } from "@mdi/js";
-import { mdiMessageSettingsOutline } from "@mdi/js";
-import PostService from "../services/PostService";
 export default {
   name: "SinglePost",
   data() {
     return {
-      post: "",
-
-      mdiCloseThick,
-      mdiMessageSettingsOutline,
+      options: true,
       isValid: true,
-      rules: {
-        required: value => !!value || "Required."
-      },
-      message: "null",
+      withLink: false,
+      withImage: false,
+      withMessage: false,
+      showLink: true,
+      showImage: true,
+      showMessage: true,
+      message: "",
       link: null,
       file: "",
-      messageRetour: null,
-      errorMessage: null,
-      linkInput: false,
-      textInput: false
+     
     };
   },
-  async mounted() {
-    try {
-      const id = this.$route.params.id;
-      console.log(id);
-      this.post = await PostService.getPostById(id);
-      console.log(this.post);
-    } catch (error) {
-      console.log(error);
-    }
+  computed: {
+    post() {
+      return this.$store.getters.post;
+    },
+   
+  },
+  beforeMount() {
+    let id = this.$route.params.id;
+    this.$store.dispatch("getPostById", id);
   },
   methods: {
+    toggleMessage() {
+      this.withMessage = true;
+      this.showMessage = false;
+    },
+    toggleLink() {
+      this.withLink = true;
+      this.showLink = false;
+    },
+    toggleImage() {
+      this.withImage = true;
+      this.showImage = false;
+    },
     uploadImage() {
       const file = this.$refs.file.files[0];
       this.file = file;
     },
-    async onSubmit() {
+    getBackToFeed() {
+      this.$router.push("/posts");
+    },
+    onSubmit() {
+      let id = this.$route.params.id;
       const formData = new FormData();
       if (this.message !== null) {
         formData.append("message", this.message);
-      } else {
-        formData.append("message", this.post.data.message);
       }
       if (this.link !== null) {
         formData.append("link", this.link);
       }
-      formData.append("imageUrl", this.file);
-      //formData.append("userId", this.userId);
-      console.log(this.message)
-
-
-      try {
-        const response = await axios.put(
-          `http://localhost:3000/api/posts/ ${this.$route.params.id}`,
-          formData,
-          { headers: { Authorization: this.$store.state.token } }
-        );
-        this.messageRetour = response.data.messageRetour;
-        console.log(response);
-        let router = this.$router;
-        setTimeout(function() {
-          router.push("/posts");
-        }, 2000);
-      } catch (error) {
-        this.errorMessage = error.response.data.error;
-      }
-    },
-    getBackToFeed() {
-      this.$router.push("/posts");
+      formData.append("image", this.file);
+          this.$store.dispatch("getPosts");
+      this.$store.dispatch("updatePost", formData);
+      this.$store.dispatch("getPostById", id);
+      this.showImage = true;
+      this.options = false;
+      this.showLink = true;
+      this.showMessage = true;
+      this.withImage = false;
+      this.withLink = false;
+      this.withMessage = false;
+      this.getBackToFeed();
     },
     newLink() {
       this.linkInput = true;
     },
     newText() {
       this.textInput = true;
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
-.post-title {
-  position: relative;
-}
 .return-btn {
   position: absolute;
   right: 0;
-}
-.text-box {
-  display: flex;
-  align-content: center;
+  top: 10px;
 }
 .link-box {
   display: flex;
   align-content: center;
+}
+.message {
+  width: 500px;
+  margin: 1.2em !important;
+  padding: 15px;
 }
 </style>

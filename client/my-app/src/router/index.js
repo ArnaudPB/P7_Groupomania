@@ -1,24 +1,27 @@
-import Vue from "vue";
-import VueRouter from "vue-router";
-import Home from "../views/Home.vue";
-import Signup from "../components/Signup.vue";
-import Login from "../components/Login.vue";
-import Feed from "../views/Feed.vue";
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+import Home from '../views/Home.vue';
+import Signup from '../components/Signup.vue';
+import Login from '../components/Login.vue';
+import Feed from '../views/Feed.vue';
+import HotFeed from '../views/HotFeed.vue';
 import NewPost from '../components/NewPost.vue';
 import Account from '../components/Account.vue';
 import SinglePost from '../components/SinglePost.vue';
-import AddComment from '../components/AddComment.vue';
+import Accounts from '../components/Accounts.vue';
+
+
 
 Vue.use(VueRouter);
 
 const routes = [{
-        path: "/",
-        name: "Home",
+        path: '/',
+        name: 'Home',
         component: Home,
     },
     {
-        path: "/signup",
-        name: "signup",
+        path: '/signup',
+        name: 'signup',
         component: Signup,
     },
     {
@@ -27,7 +30,7 @@ const routes = [{
         component: Login,
     },
     {
-        path: '/account',
+        path: '/account/:id',
         name: 'account',
         component: Account,
     },
@@ -37,33 +40,42 @@ const routes = [{
         component: Feed,
     },
     {
+        path: '/hot',
+        name: 'hotFeed',
+        component: HotFeed,
+    },
+    {
         path: '/posts/:id',
         name: 'singlePost',
         component: SinglePost,
+
     },
     {
-        path: '/posts/:id/addcomment',
-        name: 'AddComment',
-        component: AddComment,
+        path: '/accounts',
+        name: 'accounts',
+        component: Accounts,
+
     },
+
     {
         path: '/add',
         name: 'NewPost',
         component: NewPost,
     },
+
     {
-        path: "/about",
-        name: "About",
+        path: '/about',
+        name: 'About',
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
         component: () =>
-            import ( /* webpackChunkName: "about" */ "../views/About.vue"),
+            import ( /* webpackChunkName: "about" */ '../views/About.vue'),
     },
 ];
 
 const router = new VueRouter({
-    mode: "history",
+    mode: 'history',
     base: process.env.BASE_URL,
     routes,
 });

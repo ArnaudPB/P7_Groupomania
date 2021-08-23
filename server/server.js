@@ -1,12 +1,9 @@
-const http = require('http');
-const app = require('./app');
-const debug = require('debug')('e-template:server');
-const models = require('./models/index');
-
-const normalizePort = val => {
-    // Normalizeport function send a valid port, wether it's a number or a string
+const http = require("http");
+const app = require("./app");
+const db = require("./models/index");
+const normalizePort = (val) => {
+    // la fonction normalizeport renvoie un port valide, qu'il soit fourni sous la forme d'un number ou d'un string
     const port = parseInt(val, 10);
-
     if (isNaN(port)) {
         return val;
     }
@@ -15,23 +12,24 @@ const normalizePort = val => {
     }
     return false;
 };
-const port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
+const port = normalizePort(process.env.PORT || "3000");
+app.set("port", port);
 
-const errorHandler = error => {
-    // the error handler function seek for different types of error and deals with them then it's saved in the server
-    if (error.syscall !== 'listen') {
+const errorHandler = (error) => {
+    // la fonction errorHandler  recherche les différentes erreurs et les gère de manière appropriée. Elle est ensuite enregistrée dans le serveur ;
+    if (error.syscall !== "listen") {
         throw error;
     }
     const address = server.address();
-    const bind = typeof address === 'string' ? 'pipe ' + address : 'port: ' + port;
+    const bind =
+        typeof address === "string" ? "pipe " + address : "port: " + port;
     switch (error.code) {
-        case 'EACCES':
-            console.error(bind + ' requires elevated privileges.');
+        case "EACCES":
+            console.error(bind + " requires elevated privileges.");
             process.exit(1);
             break;
-        case 'EADDRINUSE':
-            console.error(bind + ' is already in use.');
+        case "EADDRINUSE":
+            console.error(bind + " is already in use.");
             process.exit(1);
             break;
         default:
@@ -41,20 +39,14 @@ const errorHandler = error => {
 
 const server = http.createServer(app);
 
-models.sequelize.sync().then(function() {
-    /**
-     * Listen on provided port, on all network interfaces.
-     */
-    server.listen(port, function() {
-        debug('Express server listening on port ' + server.address().port);
-    });
-    server.on('error', errorHandler);
-    server.on('listening', () => {
+db.sequelize.sync().then(function() {
+    server.on("error", errorHandler);
+    server.on("listening", () => {
         const address = server.address();
         const bind =
-            typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
-        console.log('Listening on ' + bind);
+            typeof address === "string" ? "pipe " + address : "port " + port;
+        console.log("Listening on " + bind);
     });
-
-    require('./config/admin');
-});
+    server.listen(port);
+    require("./config/admin"); // la fonction setAdmin est appelée
+}); // un écouteur d'évènements est également enregistré, consignant le port ou le canal nommé sur lequel le serveur s'exécute dans la console.

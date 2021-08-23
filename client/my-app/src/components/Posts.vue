@@ -2,134 +2,226 @@
   <div>
     <v-card class="posts-card mx-auto mt-4 mb-4 pb-5" round elevation="2">
       <div>
-        <div class="d-flex justify-space-between pr-2 blue-grey lighten-2">
-          <v-card-title class="h6"
-           >Post publié par {{ pseudo }} {{ id }} ||| le
-            {{ createdAt.split("T")[0] }}
+        <div class="d-flex justify-space-between pr-2 ">
+          <v-card-title class="post-title">
+            <v-avatar class="profil-post" size="52px">
+              <img
+                v-if="post.User.photo"
+                :src="post.User.photo"
+                alt="Photo de profil"
+              />
+              <v-icon
+                role="avatar personnalisé"
+                v-else-if="
+                  post.User.photo === null &&
+                    post.User.id === $store.state.user.id
+                "
+                color="pink"
+                size="52px"
+                >$vuetify.icons.account</v-icon
+              >
+              <v-icon role="avatar" size="52px" v-else
+                >$vuetify.icons.account</v-icon
+              >
+            </v-avatar>
+            <div class="nom-date mt-3">
+              <span class="pseudo text-left ml-5">{{ post.User.pseudo }}</span>
+              <span class="date ml-5 text-left">{{
+                post.createdAt | moment("calendar")
+              }}</span>
+            </div>
           </v-card-title>
           <div class="post-options">
-            <v-btn
-            
-              v-if="userId === this.$store.state.user.id"
-              @click="getOnePost"
-              class="mx-2"
-              fab
-              dark
-              x-small
-              color="white"
-            >
-             <v-icon class=" rounded-circle">{{ mdiUpdate }}</v-icon>
-            </v-btn>
-            <v-btn
+            <v-tooltip v-if="$store.state.user.id == post.User.id" bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  class="mx-2"
+                  fab
+                  primary
+                  x-small
+                  v-bind="attrs"
+                  v-on="on"
+                  aria-label="modifier le post"
+                  @click="getOnePost(post.id)"
+                >
+                  <v-icon class=" rounded-circle">$vuetify.icons.update</v-icon>
+                </v-btn>
+              </template>
+              <span>Modifier</span>
+            </v-tooltip>
+            <v-tooltip
               v-if="
-                userId === this.$store.state.user.id ||
-                  this.$store.state.user.admin === true
+                $store.state.user.id === post.User.id ||
+                  $store.state.user.admin === true
               "
-              class="mx-2"
-              fab
-              dark
-              x-small
-              color="white"
+              bottom
             >
-            <v-icon @click="deletePost({ id })" small class=" rounded-circle">
-                {{ mdiTrashCanOutline }}
-              </v-icon>
-            </v-btn>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  class="mx-2"
+                  fab
+                  primary
+                  x-small
+                  v-bind="attrs"
+                  v-on="on"
+                  aria-label="supprimer le post"
+                  @click="deletePost(post.id)"
+                >
+                  <v-icon small class=" rounded-circle">
+                    $vuetify.icons.delete
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Supprimer</span>
+            </v-tooltip>
           </div>
         </div>
         <div class="pl-3 pr-2-3">
           <v-card-text class="text-left">
             <p class="body-1">
-              {{ message }}
+              {{ post.message }}
             </p>
           </v-card-text>
         </div>
         <div class="pb-5">
           <v-img
-            v-if="link"
-            :src="link"
-            :max-height="600"
+            v-if="post.link"
+            :src="post.link"
+            alt="lien posté par l'utilisateur"
+            :max-height="300"
             :max-width="400"
             class="mx-auto pb-5"
           >
           </v-img>
-
           <v-img
-            v-if="imageUrl"
-            :src="imageUrl"
+            v-if="post.imageUrl"
+            :src="post.imageUrl"
+            alt="image postée par l'utilisateur"
             :max-height="600"
             :max-width="400"
             class="mx-auto pb-5"
           >
           </v-img>
         </div>
-
         <v-divider></v-divider>
-         <v-card-actions class="pt-5  pr-4 d-flex justify-md-space-between">
-          <div class="">
-           <v-btn @click="show = !show, getPostId({id})" color="red lighten-2 " text>
+        <div class="d-flex flex-column align-end pr-3">
+          <div>{{ post.Comments.length }} comments</div>
+          <div>{{ post.Likes.length }} j'aime</div>
+        </div>
+        <v-divider></v-divider>
+        <v-card-actions class="pt-5  pr-4 d-flex justify-space-between">
+          <div class=" d-flex justify-md-space-between">
+            <v-btn @click="show = !show" text aria-label="accès commentaires">
               Commentaires
             </v-btn>
-            <v-btn icon @click="show = !show">
+            <v-btn icon @click="show = !show" aria-label="accès commentaires">
               <v-icon>{{
                 show ? "mdi-chevron-up" : "mdi-chevron-down"
               }}</v-icon>
             </v-btn>
-
           </div>
-
-           <div>
-             <v-btn
-
-              @click="getPostId({id}),addComment()"
-              class="mx-2"
-              fab
-              dark
+          <div class="d-flex  align-end pr-3">
+            <v-btn
+              @click="likePost(post.id)"
               x-small
-              color="white"
+              aria-label="liker"
+              class="like-btn"
             >
-              <v-icon class=" rounded-circle">{{ mdiUpdate }}</v-icon>
-            </v-btn>
-            <v-btn @click="likePost">
-              <v-icon class=" material-icons ">
-                {{ mdiEmoticonOutline }}
+              <v-icon :color="isLiked">
+                $vuetify.icons.like
               </v-icon>
-              {{ Likes.filter(obj => obj.type === true).length }}
-            </v-btn>
-            <v-btn @click="dislikePost" class="ml-3">
-              <v-icon>{{ mdiEmoticonSadOutline }}</v-icon>
-              {{ Likes.filter(obj => obj.type === false).length }}
             </v-btn>
           </div>
         </v-card-actions>
         <v-expand-transition>
           <div v-show="show">
             <v-divider></v-divider>
-             <div class="comments-box">               
-
-              <v-list v-for="comment in comments" :key="comment.id">
-                <v-list-item>
-                  <v-list-item-avatar>
-                    <v-icon>{{ mdiAccountCircle }}</v-icon>
+            <div class="comments-box d-flex flex-column justify-center">
+              <v-card-text class="comment-input">
+                <v-form
+                  v-model="isValid"
+                  @submit.prevent="onSubmitComment(post.id)"
+                  enctype="multipart/form-data"
+                  class="validate comment-form"
+                >
+                  <v-text-field
+                    name="input-1-3"
+                    label="ton commentaire"
+                    v-model="data.commentMessage"
+                    auto-grow
+                    class="comment-form__message input-group--focused"
+                  >
+                  </v-text-field>
+                  <v-btn
+                    @click="onSubmitComment(post.id)"
+                    :disabled="!isValid"
+                    class="comment-form__btn"
+                    aria-label="publier commentaire"
+                    >Poster</v-btn
+                  >
+                </v-form>
+                <div>
+                  <div class="danger-alert" v-html="errorMessage" />
+                  <div class="danger-alert" v-html="messageRetour" />
+                </div>
+              </v-card-text>
+              <v-list
+                v-for="comment in post.Comments"
+                :key="comment.id"
+                :comment="comment"
+              >
+                <v-list-item class="comment">
+                  <v-list-item-avatar class="comment_photo">
+                    <img
+                      v-if="comment.User.photo !== null"
+                      :src="comment.User.photo"
+                      alt="Photo de profil"
+                    />
+                    <v-icon
+                      v-else-if="
+                        comment.User.photo === null &&
+                          comment.UserId === $store.state.user.id
+                      "
+                      color="pink"
+                      size="32px"
+                      role="avatar"
+                      >$vuetify.icons.account</v-icon
+                    >
+                    <v-icon v-else size="32px" role="avatar"
+                      >$vuetify.icons.account</v-icon
+                    >
                   </v-list-item-avatar>
 
-             <v-list-item-content>
-                   <div class="comment mt-5 ">
-                      <strong
-                        v-html="comment.pseudo" class="pr-5 comment__pseudo"
-                      ></strong>
-                      <p
-                        v-html="comment.message" class="pr-2 text-left comment__message"
-                      ></p>
-                     <v-icon
-                        @click="deleteComment"
-                        class=" rounded-circle comment-delete">{{ mdiCloseThick }}
-                        </v-icon>
-
-
-
-                    </div>
+                  <v-list-item-content class="comment_body d-flex ">
+                    <strong
+                      v-html="comment.User.pseudo"
+                      class="pr-5 text-left  pseudo comment__pseudo"
+                    ></strong>
+                    <span
+                      v-html="comment.message"
+                      class=" text-left comment__message"
+                    ></span>
                   </v-list-item-content>
+
+                  <v-tooltip bottom>
+                    <template
+                      v-if="
+                        $store.state.user.id === comment.UserId ||
+                          $store.state.user.admin === true
+                      "
+                      v-slot:activator="{ on, attrs }"
+                    >
+                      <v-btn fab primary x-small v-bind="attrs" v-on="on">
+                        <v-icon
+                          @click="deleteComment(comment.id)"
+                          class=" rounded-circle "
+                          aria-label="supprimer commentaire"
+                          >$vuetify.icons.delete
+                        </v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Supprimer</span>
+                  </v-tooltip>
                 </v-list-item>
                 <v-divider></v-divider>
               </v-list>
@@ -142,158 +234,80 @@
 </template>
 
 <script>
-//import DeleteButton from "../components/DeleteButton";
-
-import { mdiEmoticonOutline } from "@mdi/js";
-import { mdiEmoticonSadOutline } from "@mdi/js";
-import { mdiTrashCanOutline } from "@mdi/js";
-import { mdiUpdate } from "@mdi/js";
-import { mdiAccountCircle } from "@mdi/js";
-import { mdiCloseThick} from "@mdi/js";
-//import Likes from "../components/Likes.vue";
-//import PostService from "../services/PostService";
+import PostService from "../services/PostService";
 export default {
   name: "Posts",
-   /* components: {
-    DeleteButton
-  } */
   props: {
-    link: {
-      type: String
+    post: {
+      type: Object,
     },
-      message: {
-        type: String,
+  },
+  data: function() {
+    return {
+      show: false,
+      width: 500,
+      commentForm: false,
+      user: false,
+      showFeed: true,
+      update: false,
+      isValid: true,
+      rules: {
+        required: (value) => !!value || "Required.",
       },
-      userid: {
-        type: Number,
-      },
-      pseudo: {
-        type: String,
-      },
-    imageUrl: {
-      type: String
-    },
-    postUrl: {
-      type: String
-    },
-    Likes: {
-      type: Array
-    },
-    createdAt: {
-      type: String
-    },
-    comments: {
-    type: Array
-    }
-},
-    data: function() {
-      return {
-        show: false,
-        mdiEmoticonOutline,
-        mdiEmoticonSadOutline,
-        mdiTrashCanOutline,
-        mdiCloseThick,
-        mdiUpdate,
-        mdiAccountCircle,
-        width: 500,
-        postId: 0,
-        commentForm:false,
-        likes:"",
-        dislikes:"",
-        user: false,
-        showFeed: true,
-        update: false,
-        isValid: true,
-         data: {
-        commentMessage:"",
+      messageRetour: null,
+      errorMessage: null,
+      data: {
+        commentMessage: "",
         commentPseudo: this.$store.state.user.pseudo,
       },
-        rules: {
-        required: value => !!value || "Required."
-       },
-      messageRetour: null,
-      errorMessage: null
-        };
-        },
+    };
+  },
+  computed: {
+    isLiked() {
+      const userId = this.$store.state.user.id;
+      let userLike = this.post.Likes.map((a) => a.UserId);
+      if (userLike.includes(userId)) {
+        return "pink";
+      } else {
+        return "";
+      }
+    },
+  },
   methods: {
+    async reloadFeed() {
+      try {
+        const response = await PostService.getPosts();
+        this.posts = response.data;
+      } catch (error) {
+        this.errorMessage = error.response.data.error;
+      }
+    },
+    getProfile(id) {
+      this.$router.push(`/account/${id}`);
+    },
     deletePost() {
-      this.$emit("deletePost", this.id);
-     },
-    getOnePost() {
-      this.$router.push(this.postUrl);
-    },
-     getPostId(id) {
-      this.postId = parseInt(Object.values(id));
-      console.log(this.postId);
-    },
-    addComment() {
-      const id = this.postId
-      this.$router.push(`/posts/${id}/addcomment`)
+      this.$emit("deletePost", this.post.id);
     },
     likePost() {
+      this.$emit("likePost", this.post.id);
     },
-    dislikePost() {
+    getOnePost(id) {
+      this.$router.push(`posts/${id}`);
     },
-    showComentForm() {
-      this.commentForm = true      
+    onSubmitComment(id) {
+      this.$store.dispatch("getPosts");
+      this.$store.dispatch("commentPost", {
+        id: id,
+        data: this.data,
+      });
+      this.data.commentMessage = "";
+      this.$store.dispatch("getPosts");
+      this.$store.dispatch("getPostById", this.post.id);
     },
-    deleteComment() {
-    }
-  }
+    deleteComment(id) {
+      this.$store.dispatch("deleteComment", id), this.reloadFeed();
+    },
+  },
 };
 </script>
-<style lang="scss" scoped>
-/*.posts-card {
-  width: 40em;
-}*/
-.body-1 {
-  font-size: 20px;
-  border: 2px grey solid;
-  padding: 15px;
-}
-.posts-row {
-  justify-content: center;
-}
-.materials-icons {
-  color: brown;
-}
-.post-options {
-  margin-top: 1rem;
-  display: flex;
-}
-.update-title {
-  display: flex;
-  justify-content: space-between;
-}
-.comment {
-  display: flex;
-   align-content: center;
-  position: relative;
-  &__pseudo {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  &__message {
-    width: 30rem;
-  }
-
-}
-  .comment-delete {  
-    position: absolute;
-    right: 0;
-    bottom: 10px;   
-}
-.comment-form {
-  display: flex;
-  justify-content: space-between;
- 
-  
-  padding: 10px;
-  
-  &__btn {
-    margin-left: 1rem;
-   margin-top:0.33rem;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

@@ -1,62 +1,38 @@
-const db = require('../models');
-const bcrypt = require('bcrypt');
-
-
-
-/* const admin = {
-pseudo: "admin",
-email: "admin@mail.com",
-password: "Moderator",
-admin: true
-} */
-
+const db = require("../models");
+const bcrypt = require("bcrypt");
+// Fonction qui crée le compte admin dans la base de données à la connexion s'il n'existe pas
 function setAdmin(req, res) {
     db.User.findOne({ where: { email: "admin@mail.com" } || { pseudo: "admin" } })
-        .then(user => {
+        .then((user) => {
             if (!user) {
-                bcrypt.hash("Moderator", 10)
-                    .then(hash => {
+                bcrypt
+                    .hash("Moderator", 10)
+                    .then((hash) => {
                         const admin = db.User.create({
                                 pseudo: "admin",
                                 email: "admin@mail.com",
                                 password: hash,
-                                admin: true
+                                admin: true,
                             })
-                            .then(admin => {
+                            .then((admin) => {
                                 console.log({
-
                                     admin,
                                     message: `Votre compte admin est bien créé ${admin.pseudo} !`,
                                 });
                             })
-                            .catch(error => {
+                            .catch((error) => {
                                 res.status(400).json({ error });
-                            })
+                            });
                     })
-                    .catch(error => {
+                    .catch((error) => {
                         res.status(500).send({ error });
-                    })
-
+                    });
             } else {
                 console.log({ message: "l'admin est déjà créé" });
             }
         })
-        .catch(error => {
+        .catch((error) => {
             console.log({ error });
-        })
+        });
 }
 module.exports = setAdmin();
-
-
-/* db.User.create({
-    pseudo: admin.pseudo,
-    email: admin.email,
-    password: admin.password,
-    admin: admin.admin
-})
-    .then(() => {
-    console.log({ message: 'admin enregistré dans la base de données' });
-    })
-    .catch(error => {
-    console.log({ error });
-    }) */

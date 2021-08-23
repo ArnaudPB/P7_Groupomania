@@ -1,45 +1,31 @@
 <template>
-  <v-footer fixed v-bind="localAttrs" :padless="padless">
-    <v-card flat tile width="100%" class="red lighten-4 text-center">
-      <v-card-text class="white--text">
-        <v-btn  to="/" icon class="mx-4">
-          <v-icon  size="24px">
-            {{ mdiHome }}
-          </v-icon>
-        </v-btn>
-        {{ new Date().getFullYear() }} — <strong>Groupomania</strong>
-        <v-btn icon class="mx-4">
-          <v-icon size="24px">
-            {{ mdiEmail }}
-          </v-icon>
-        </v-btn>
-      </v-card-text>
-    </v-card>
+  <v-footer fixed dark class="footer">
+    <v-btn x-small to="/about" class="ml-5 mt-3">Règlement</v-btn>
+    <!--         <div v-if="!$store.state.isLoggedIn" class="mt-2 mr-2">
+         {{ new Date().getFullYear() }} — <strong>Groupomania</strong>
+        </div>
+        <div v-else class="mt-2">
+         {{ new Date().getFullYear() }} — <strong>Groupomania</strong>
+        </div> -->
+    <v-btn
+      v-if="$store.state.isLoggedIn"
+      class=" mt-3 mr-5"
+      x-small
+      @click="logOut"
+      to="/"
+      >Déconnexion</v-btn
+    >
   </v-footer>
 </template>
 <script>
-  import { mdiHome } from '@mdi/js';
-  import { mdiEmail } from '@mdi/js';
-  export default {
-    name: 'PageFooter',
-    data: () => ({
-      mdiHome,
-      mdiEmail,
-      items: ['default', 'absolute', 'fixed'],
-      padless: false,
-      variant: 'default',
-    }),
-    computed: {
-      localAttrs() {
-        const attrs = {};
-        if (this.variant === 'default') {
-          attrs.absolute = false;
-          attrs.fixed = false;
-        } else {
-          attrs[this.variant] = true;
-        }
-        return attrs;
-      },
+export default {
+  name: "PageFooter",
+  data: () => ({}),
+  methods: {
+    logOut: function() {
+      this.$store.dispatch("logOut");
     },
-  };
+  },
+};
 </script>
+<style lang="scss" scoped></style>

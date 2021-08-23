@@ -87,6 +87,7 @@
         </v-card>
       </v-col>
     </v-row>
+
     <v-card
       v-if="$store.state.posts.length === 0"
       class="posts-card mx-auto"
@@ -103,14 +104,9 @@
 import Posts from "@/components/Posts.vue";
 import { mdiPencilOutline } from "@mdi/js";
 export default {
-  name: "Feed",
+  name: "HotFeed",
   components: {
     Posts,
-  },
-  computed: {
-    posts() {
-      return this.$store.getters.posts;
-    },
   },
   data() {
     return {
@@ -118,8 +114,16 @@ export default {
       mdiPencilOutline,
     };
   },
-  beforeMount() {
-    this.$store.dispatch("getPosts");
+  computed: {
+    posts() {
+      return this.$store.getters.posts;
+    },
+    isLiked() {
+      return this.$store.getters.isLiked;
+    },
+  },
+  async beforeMount() {
+    this.$store.dispatch("getHotPosts");
   },
   methods: {
     deletePost(id) {
@@ -134,10 +138,9 @@ export default {
         id: id,
         data: data,
       });
-      this.$store.dispatch("getPosts");
     },
   },
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style></style>
