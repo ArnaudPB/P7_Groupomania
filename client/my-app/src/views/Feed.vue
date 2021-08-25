@@ -3,14 +3,7 @@
     <v-row class="bloc">
       <v-col sm="12" md="6" class="mx-auto">
         <v-card flat class="posts-card ">
-          <v-img
-            :src="require('../assets/logo_transparent.png')"
-            class="my-2"
-            contain
-            height="50"
-            alt="logo groupomania"
-          />
-          <h1 class="font-weight-regular text-center">Le fil d'actu !</h1>
+          <h1 class="font-weight-regular text-center"></h1>
           <v-card-title
             class=" d-flex justify-space-between"
             fixed

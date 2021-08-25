@@ -16,7 +16,7 @@
                   post.User.photo === null &&
                     post.User.id === $store.state.user.id
                 "
-                color="pink"
+                color="blue"
                 size="52px"
                 >$vuetify.icons.account</v-icon
               >
@@ -84,6 +84,8 @@
           </v-card-text>
         </div>
         <div class="pb-5">
+
+
           <v-img
             v-if="post.link"
             :src="post.link"
@@ -92,7 +94,11 @@
             :max-width="400"
             class="mx-auto pb-5"
           >
+
+
           </v-img>
+
+
           <v-img
             v-if="post.imageUrl"
             :src="post.imageUrl"
@@ -182,7 +188,7 @@
                         comment.User.photo === null &&
                           comment.UserId === $store.state.user.id
                       "
-                      color="pink"
+                      color="blue"
                       size="32px"
                       role="avatar"
                       >$vuetify.icons.account</v-icon
@@ -267,7 +273,7 @@ export default {
       const userId = this.$store.state.user.id;
       let userLike = this.post.Likes.map((a) => a.UserId);
       if (userLike.includes(userId)) {
-        return "pink";
+        return "blue";
       } else {
         return "";
       }

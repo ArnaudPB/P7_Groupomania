@@ -90,7 +90,7 @@ export default {
     },
     isLoggedIn() {
       if (this.$store.state.isLoggedIn) {
-        return "pink";
+        return "blue";
       } else {
         return "";
       }

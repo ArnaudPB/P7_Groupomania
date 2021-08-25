@@ -2,13 +2,6 @@
   <v-container class="home-container">
     <v-row class="text-center bandeau">
       <v-col cols="12">
-        <v-img
-          :src="require('../assets/logo_transparent.png')"
-          class="my-2 "
-          contain
-          height="100"
-          alt="logo"
-        />
       </v-col>
 
       <v-col class="mb-4 px-5">
@@ -32,9 +25,8 @@ export default {
 </script>
 <style lang="scss" scoped>
 .home-container {
- /*  background-image: url("../assets/stars.svg");
-  background-repeat: repeat;
-  background-size: cover; */
+   background-image: url("../assets/Newyork.jpeg");
+
   display: flex;
   justify-content: center;
   align-items: center;

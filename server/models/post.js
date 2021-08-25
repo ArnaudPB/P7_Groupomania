@@ -2,6 +2,11 @@
 const {
     Model
 } = require('sequelize');
+
+// const paranoid = require('paranoid')
+// const timestamp = require('timestamp');
+const { Sequelize } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
     class Post extends Model {
         /**
@@ -27,11 +32,16 @@ module.exports = (sequelize, DataTypes) => {
         link: { type: DataTypes.STRING, allowNull: true },
         imageUrl: { type: DataTypes.STRING, allowNull: true },
 
+        // deleteAt: { type: Sequelize.DATE }
+
 
     }, {
         sequelize,
-
         modelName: 'Post',
+
+        //paranoid: true
+
+        // timestamp: true
     });
     return Post;
 };

@@ -200,7 +200,7 @@ export default new Vuex.Store({
         getPosts({ commit }) {
             PostService.getPosts().then((response) => {
                 const posts = response.data;
-                console.log("\n\n\nDEBUG\n\n" + response.data + "\n\n\n")
+                // console.log("\n\n\nDEBUG\n\n" + response.data + "\n\n\n")
                 commit("GET_POSTS", posts);
             });
         },

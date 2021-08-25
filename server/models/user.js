@@ -1,5 +1,8 @@
 "use strict";
 const { Model } = require("sequelize");
+const paranoid = require('paranoid')
+const timestamp = require('timestamp')
+
 module.exports = (sequelize, DataTypes) => {
     class User extends Model {
         /**
@@ -24,6 +27,8 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         sequelize,
         modelName: "User",
+        // paranoid: true,
+        // timestamp: true
     });
     return User;
 };

@@ -138,6 +138,7 @@ export default {
       const file = this.$refs.file.files[0];
       this.file = file;
     },
+
     onSubmit() {
       const formData = new FormData();
       formData.append("message", this.message);

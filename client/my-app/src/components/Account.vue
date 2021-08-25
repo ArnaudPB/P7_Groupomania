@@ -97,9 +97,9 @@
               class="d-flex flex-column justify-space-between"
               max-width="70%"
             >
-              <strong>Ta bio: </strong>
+              <strong>Bio: </strong>
               <div>
-                <span v-if="!user.bio"> Parle nous de toi 😊</span>
+                <span v-if="!user.bio"> Décrivez vous au travers de cet espace</span>
                 <span class="bio-field">{{ user.bio }}</span>
               </div>
             </div>
@@ -176,7 +176,7 @@ export default {
     },
     isLoggedIn() {
       if (this.$store.state.isLoggedIn) {
-        return "pink";
+        return "blue";
       } else {
         return "";
       }

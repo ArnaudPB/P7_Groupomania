@@ -2,6 +2,8 @@ const token = require("../middleware/token");
 const db = require("../models"); // accès tables
 const fs = require("fs"); //
 
+const paranoid = require("paranoid");
+
 exports.getAllPosts = async(req, res) => {
     try {
         const posts = await db.Post.findAll({
@@ -32,6 +34,9 @@ exports.getAllPosts = async(req, res) => {
         });
         res.status(200).send(posts);
     } catch (error) {
+
+        console.log(error);
+
         return res.status(500).send({
             error: "Une erreur est survenu lors de la récupération des posts ",
         });
@@ -158,17 +163,42 @@ exports.deletePost = async(req, res) => {
         const userId = token.getUserId(req);
         const checkAdmin = await db.User.findOne({ where: { id: userId } });
         const post = await db.Post.findOne({ where: { id: req.params.id } });
+
         if (userId === post.UserId || checkAdmin.admin === true) {
             if (post.imageUrl) {
                 const filename = post.imageUrl.split("/upload")[1];
+                const postId = req.params.id;
+                const user = db.Like.findOne({
+                    where: { PostId: postId },
+                });
+                if (user) {
+                    db.Like.destroy({ where: { PostId: postId } }, { truncate: true, restartIdentity: true });
+                    // db.Comment.destroy({ where: { id: req.params.id } }, { truncate: true });
+                    res.status(200).send({ messageRetour: "vou n'aimez plus ce post" });
+                }
                 fs.unlink(`upload/${filename}`, () => {
                     db.Post.destroy({ where: { id: post.id } });
                     res.status(200).json({ message: "Post supprimé" });
                 });
             } else {
-                db.Post.destroy({ where: { id: post.id } }, { truncate: true });
+
+                const postId = req.params.id;
+                const user = db.Like.findOne({
+                    where: { PostId: postId },
+                });
+                if (user) {
+                    db.Like.destroy({ where: { PostId: postId } }, { truncate: true, restartIdentity: true });
+                    // db.Comment.destroy({ where: { id: req.params.id } }, { truncate: true });
+                    res.status(200).send({ messageRetour: "vou n'aimez plus ce post" });
+                }
+
+                // db.Comment.destroy({ where: { id: req.params.id } }, { truncate: true });
+                // res.status(200).json({ message: "commentaire supprimé" });
+
+                await db.Post.destroy({ where: { id: post.id } }, { truncate: true });
                 res.status(200).json({ message: "Post supprimé" });
             }
+
         } else {
             res.status(400).json({ message: "Vous n'avez pas les droits requis" });
         }

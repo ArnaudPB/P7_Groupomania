@@ -23,7 +23,7 @@
                   v-else-if="
                     (user.photo === null) & ($store.state.user.id === user.id)
                   "
-                  color="pink"
+                  color="blue"
                   size="42"
                   >$vuetify.icons.account</v-icon
                 >
