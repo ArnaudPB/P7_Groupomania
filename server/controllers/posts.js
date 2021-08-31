@@ -167,33 +167,51 @@ exports.deletePost = async(req, res) => {
         if (userId === post.UserId || checkAdmin.admin === true) {
             if (post.imageUrl) {
                 const filename = post.imageUrl.split("/upload")[1];
+
                 const postId = req.params.id;
-                const user = db.Like.findOne({
-                    where: { PostId: postId },
-                });
+                const comm = db.Comment.findOne({ where: { PostId: postId } });
+
+                //check and delete likes
+                const user = db.Like.findOne({ where: { PostId: postId } });
+
                 if (user) {
                     db.Like.destroy({ where: { PostId: postId } }, { truncate: true, restartIdentity: true });
                     // db.Comment.destroy({ where: { id: req.params.id } }, { truncate: true });
-                    res.status(200).send({ messageRetour: "vou n'aimez plus ce post" });
+                    // res.status(200).send({ messageRetour: "vou n'aimez plus ce post" });
                 }
+
+                //delete comm
+                if (comm)
+                    db.Comment.destroy({ where: { PostId: postId } }, { truncate: true });
+
+                // db.Post.destroy({ where: { id: postId } });
+
                 fs.unlink(`upload/${filename}`, () => {
                     db.Post.destroy({ where: { id: post.id } });
                     res.status(200).json({ message: "Post supprimé" });
                 });
-            } else {
 
+            } else {
                 const postId = req.params.id;
                 const user = db.Like.findOne({
                     where: { PostId: postId },
                 });
+
+                const comm = db.Comment.findOne({
+                    where: { PostId: postId },
+                });
+
+                //del likes
                 if (user) {
                     db.Like.destroy({ where: { PostId: postId } }, { truncate: true, restartIdentity: true });
-                    // db.Comment.destroy({ where: { id: req.params.id } }, { truncate: true });
-                    res.status(200).send({ messageRetour: "vou n'aimez plus ce post" });
+                    // res.status(200).send({ messageRetour: "vou n'aimez plus ce post" });
                 }
 
-                // db.Comment.destroy({ where: { id: req.params.id } }, { truncate: true });
-                // res.status(200).json({ message: "commentaire supprimé" });
+
+                //delete comm
+                if (comm)
+                    db.Comment.destroy({ where: { PostId: postId } }, { truncate: true });
+
 
                 await db.Post.destroy({ where: { id: post.id } }, { truncate: true });
                 res.status(200).json({ message: "Post supprimé" });

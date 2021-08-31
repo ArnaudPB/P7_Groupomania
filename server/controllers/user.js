@@ -3,6 +3,11 @@ const db = require("../models"); // mdèles de la bdd
 const token = require("../middleware/token"); // module qui génère le token
 const fs = require("fs");
 const { Op } = require("sequelize");
+const cryptojs = require('crypto-js');
+
+let persist_info = require("./pesist.json")
+
+// var bfs = require('browserify-fs');
 
 exports.signup = async(req, res) => {
     try {
@@ -36,7 +41,15 @@ exports.signup = async(req, res) => {
 };
 
 exports.login = async(req, res) => {
+
+    //faudrait faire un logout_token
+    // si l'user se logout le token = true
+    // sinon on recupère le mail + mdp + page sur laquelle est l'user, qu'on met dans un txt, et on charge l'user depuis là
+
     try {
+
+
+
         const user = await db.User.findOne({
             where: { email: req.body.email },
         }); // on vérifie que l'adresse mail figure bien dan la bdd
@@ -47,6 +60,8 @@ exports.login = async(req, res) => {
             if (!hash) {
                 return res.status(401).send({ error: "Mot de passe incorrect !" });
             } else {
+                //persist_info["mail"] = "alors ?";
+
                 const tokenObject = await token.issueJWT(user);
                 res.status(200).send({
                     // on renvoie le user et le token
@@ -56,8 +71,42 @@ exports.login = async(req, res) => {
                     expires: tokenObject.expiresIn,
                     message: "Bonjour " + user.pseudo + " !",
                 });
+
+
+                //persist_info.mdp = "test";
+                // persist_info.is_logout = false;
+
+                // fs.writeFile("./pesist.json", JSON.stringify(persist_info, null, 2), "utf8", function writeJSON(err) {
+                //     if (err) return console.log(err);
+                //     console.log(JSON.stringify(persist_info));
+                //     // console.log('writing to ' + fileName);
+                // });
+
+                // bfs.mkdir('/home/abesson/web/P7_Groupamania/P7_Groupomania/server/controllers/', function() {
+                //     bfs.writeFile('/home/abesson/web/P7_Groupamania/P7_Groupomania/server/controllers/pesist.json', JSON.stringify(persist_info))
+                // });
             }
         }
+        // } else {
+
+        //     const user = await db.User.findOne({
+        //         where: { email: persist_info.mail },
+        //     });
+
+        //     const tokenObject = await token.issueJWT(user);
+
+        //     res.status(200).send({
+        //         // on renvoie le user et le token
+        //         user: user,
+        //         token: tokenObject.token,
+        //         sub: tokenObject.sub,
+        //         expires: tokenObject.expiresIn,
+        //         message: "Bonjour " + user.pseudo + " !",
+        //     });
+
+        // }
+
+
     } catch (error) {
         return res.status(500).send({ error: "Erreur serveur" });
     }
@@ -156,3 +205,17 @@ exports.deleteAccount = async(req, res) => {
         return res.status(500).send({ error: "Erreur serveur" });
     }
 };
+
+/*
+
+post simple
+post like + com (et les enlever)
+post like + com (et les enlever) pour autre utilisateur
+
+tout ça + photo 
+tout ça + gif
+
+
+
+
+*/
