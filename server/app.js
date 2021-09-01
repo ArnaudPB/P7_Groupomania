@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs');
 const morgan = require('morgan');
 const cors = require('cors');
 const path = require('path');
@@ -16,6 +17,8 @@ const { sequelize } = require('./models/index');
 const app = express();
 
 app.use(morgan('tiny'));
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
+app.use(morgan('combined', { stream: accessLogStream }))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors()); // CORS - partage de ressources entre serveurs

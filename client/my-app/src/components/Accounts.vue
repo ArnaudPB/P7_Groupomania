@@ -37,7 +37,7 @@
                   ><span>{{ user.pseudo }}</span>
                 </div>
                 <div>
-                  <strong>Email : </strong><span>{{ user.email }}</span>
+                  
                 </div>
               </div>
             </v-card-title>

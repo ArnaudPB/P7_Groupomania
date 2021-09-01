@@ -5,27 +5,49 @@ const fs = require("fs");
 const { Op } = require("sequelize");
 const cryptojs = require('crypto-js');
 
-let persist_info = require("./pesist.json")
+require('dotenv').config();
+
+let persist_info = require("./pesist.json");
+const { deletePost } = require("./posts");
 
 // var bfs = require('browserify-fs');
 
 exports.signup = async(req, res) => {
     try {
+        const cryptedResearchedEmail = cryptojs.HmacSHA256(req.body.email, process.env.EMAIL_KEY).toString();
+
+
+
         const user = await db.User.findOne({
-            where: { email: req.body.email },
+            where: {
+                email: cryptedResearchedEmail
+            },
         });
+
+        // console.log("C KI ? " + user.email)
+
         if (user !== null) {
             if (user.pseudo === req.body.pseudo) {
                 return res.status(400).json({ error: "ce pseudo est déjà utilisé" });
             }
         } else {
             const hash = await bcrypt.hash(req.body.password, 10);
+
+            // const newUser = await db.User.create({
+            //     pseudo: req.body.pseudo,
+            //     email: req.body.email,
+            //     password: hash,
+            //     admin: false,
+            // });
+
             const newUser = await db.User.create({
                 pseudo: req.body.pseudo,
-                email: req.body.email,
+                email: cryptojs.HmacSHA256(req.body.email, process.env.EMAIL_KEY).toString(),
                 password: hash,
                 admin: false,
             });
+
+            // cryptojs.HmacSHA256(req.body.email, process.env.EMAIL_KEY).toString(),
 
             const tokenObject = await token.issueJWT(newUser);
             res.status(201).send({
@@ -36,6 +58,10 @@ exports.signup = async(req, res) => {
             });
         }
     } catch (error) {
+        // const cryptedResearchedEmail = cryptojs.HmacSHA256(req.body.email, process.env.EMAIL_KEY).toString();
+
+        console.error(error);
+
         return res.status(400).send({ error: "email déjà utilisé" });
     }
 };
@@ -46,23 +72,43 @@ exports.login = async(req, res) => {
     // si l'user se logout le token = true
     // sinon on recupère le mail + mdp + page sur laquelle est l'user, qu'on met dans un txt, et on charge l'user depuis là
 
+
+    // var data = CryptoJS.AES.encrypt(message, key);
+    // data = data.toString()
+
+    // var decr = CryptoJS.AES.decrypt(data, key);
+    // decr = decr.toString(CryptoJS.enc.Utf8);
+
+    // const LoggedUser = await db.User.findOne({ where: { is_logged: 1 } })
+
     try {
 
 
 
+        const CheckRightMail = await db.User.findOne({ where: { email: cryptojs.HmacSHA256(req.body.email, process.env.EMAIL_KEY).toString() } })
+            // const CheckRightMail = await db.User.findOne({ where: { email: req.body.email } })
+
+        const RightMail = CheckRightMail ? CheckRightMail.email : req.body.email
+
+        console.log("THE USER " + CheckRightMail);
+
+
         const user = await db.User.findOne({
-            where: { email: req.body.email },
+            where: { email: RightMail },
         }); // on vérifie que l'adresse mail figure bien dan la bdd
+
         if (user === null) {
             return res.status(403).send({ error: "Connexion échouée" });
         } else {
             const hash = await bcrypt.compare(req.body.password, user.password); // on compare les mots de passes
             if (!hash) {
-                return res.status(401).send({ error: "Mot de passe incorrect !" });
+                return res.status(401).send({ error: "Mot de passe incorrect !" + user.email });
             } else {
                 //persist_info["mail"] = "alors ?";
 
                 const tokenObject = await token.issueJWT(user);
+
+
                 res.status(200).send({
                     // on renvoie le user et le token
                     user: user,
@@ -108,6 +154,8 @@ exports.login = async(req, res) => {
 
 
     } catch (error) {
+        console.error(error);
+
         return res.status(500).send({ error: "Erreur serveur" });
     }
 };
@@ -125,6 +173,7 @@ exports.getAccount = async(req, res) => {
 exports.getAllUsers = async(req, res) => {
     // on envoie tous les users sauf admin
     try {
+        // console.log("PASSE ICI");
         const users = await db.User.findAll({
             attributes: ["pseudo", "id", "photo", "bio", "email"],
             where: {
@@ -190,15 +239,41 @@ exports.deleteAccount = async(req, res) => {
     try {
         const id = req.params.id;
         const user = await db.User.findOne({ where: { id: id } });
+
+        const likes = await db.Like.findAll({ where: { UserId: id } });
+        const comments = await db.Comment.findAll({ where: { UserId: id } });
+        const posts = await db.Post.findAll({ where: { userId: id } })
+
         if (user.photo !== null) {
             const filename = user.photo.split("/upload")[1];
             fs.unlink(`upload/${filename}`, () => {
                 // sil' y a une photo on la supprime et on supprime le compte
+
+                if (comments)
+                    db.Comment.destroy({ where: { UserId: id } }, { truncate: true });
+                if (likes)
+                    db.Like.destroy({ where: { UserId: id } }, { truncate: true, restartIdentity: true });
+
+                if (posts)
+                    db.Post.destroy({ where: { userId: id } }, { truncate: true });
+
                 db.User.destroy({ where: { id: id } });
+
                 res.status(200).json({ messageRetour: "utilisateur supprimé" });
             });
         } else {
+
+            if (comments)
+                db.Comment.destroy({ where: { UserId: id } }, { truncate: true });
+            if (likes)
+                db.Like.destroy({ where: { UserId: id } }, { truncate: true, restartIdentity: true });
+            if (posts)
+                db.Post.destroy({ where: { userId: id } }, { truncate: true });
+
+            // deletePost(req, res);
+
             db.User.destroy({ where: { id: id } }); // on supprime le compte
+
             res.status(200).json({ messageRetour: "utilisateur supprimé" });
         }
     } catch (error) {

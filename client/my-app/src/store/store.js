@@ -114,7 +114,6 @@ export default new Vuex.Store({
                 state.posts.find((element) => element.id === id),
                 post
             );
-
             state.message = "Votre post est bien modifié";
         },
 

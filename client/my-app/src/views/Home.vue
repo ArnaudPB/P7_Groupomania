@@ -7,7 +7,7 @@
       <v-col class="mb-4 px-5">
         <h1 class="display-1 font-weight-bold mb-5">
           Bienvenue sur le social network de Groupomania !<br/><br/>
-          Onoali N'tara
+          <!-- Onoali N'tara -->
         </h1>
       </v-col>
     </v-row>
@@ -21,6 +21,9 @@ export default {
     logOut: function() {
       this.$store.dispatch("logOut");
     },
+    IsUser: function() {
+
+    }
   },
 };
 </script>
